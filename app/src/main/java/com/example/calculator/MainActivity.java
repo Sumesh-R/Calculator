@@ -1,7 +1,7 @@
 package com.example.calculator;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import org.mariuszgromada.math.mxparser.*;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.view.View;
@@ -110,11 +110,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void parBTN(View view){
+        int cursorPos = display.getSelectionStart();
+        int openPar = 0;
+        int closedPar = 0;
+        int textLen = display.getText().length();
 
+        for (int i = 0; i < cursorPos; i++){
+            if(display.getText().toString().substring(i, i+1).equals("(")){
+                openPar += 1;
+            }
+            if(display.getText().toString().substring(i, i+1).equals(")")){
+                closedPar += 1;
+            }
+        }
+
+        if (openPar == closedPar || display.getText().toString().substring(textLen-1, textLen).equals(")")){
+            updateText("(");
+        }
+        else if (closedPar < openPar && !display.getText().toString().substring(textLen-1, textLen).equals(")")){
+            updateText(")");
+        }
+        display.setSelection(cursorPos + 1);
     }
 
     public void expBTN(View view){
-
+        updateText("^");
     }
 
     public void plusMinusBTN(View view){
@@ -126,7 +146,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void equalBTN(View view){
+        String userExp = display.getText().toString();
 
+        userExp = userExp.replaceAll("÷", "/");
+        userExp = userExp.replaceAll("×", "*");
+
+        Expression exp = new Expression(userExp);
+
+        String result = String.valueOf(exp.calculate());
+        display.setText(result);
+        display.setSelection(result.length());
     }
 
     public void backspaceBTN(View view){
